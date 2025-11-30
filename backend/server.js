@@ -13,6 +13,7 @@ app.use(express.json());
 
 // ROUTES
 app.use("/api/appointments", require("./routes/appointments"));
+app.use("/api/admin", require("./routes/adminAuth"));
 
 // CONNECT DATABASE
 mongoose
