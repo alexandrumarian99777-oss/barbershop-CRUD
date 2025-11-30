@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Appointment = require("../models/Appointment");
+const sendEmail = require("../utils/sendEmail");
 
 // Create appointment (public)
 // If a CONFIRMED appointment exists for the same date+time => reject
@@ -45,7 +46,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get all appointments (admin or public as your app needs)
+// Get all appointments
 router.get("/", async (req, res) => {
   try {
     const appointments = await Appointment.find().sort({ date: 1, time: 1 });
@@ -57,7 +58,6 @@ router.get("/", async (req, res) => {
 });
 
 // Get confirmed booked time slots for a given date
-// This endpoint returns only confirmed times — frontend should call this to disable slots.
 router.get("/booked/:date", async (req, res) => {
   try {
     const date = req.params.date;
@@ -70,7 +70,41 @@ router.get("/booked/:date", async (req, res) => {
   }
 });
 
-// Update appointment (full update)
+// CONFIRM APPOINTMENT + SEND EMAIL  (must be ABOVE /:id)
+router.put("/confirm/:id", async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+
+    appointment.status = "confirmed";
+    await appointment.save();
+
+    // HTML email body
+    const htmlContent = `
+      <h2>Your Appointment Is Confirmed</h2>
+      <p>Hello ${appointment.name},</p>
+      <p>Your appointment on <strong>${appointment.date}</strong> at <strong>${appointment.time}</strong> has been confirmed.</p>
+      <p>Service: <strong>${appointment.service}</strong></p>
+      <p>See you soon!</p>
+    `;
+
+    await sendEmail({
+      to: appointment.email,
+      subject: "Your Appointment Is Confirmed",
+      html: htmlContent,
+    });
+
+    return res.json({ success: true, message: "Appointment confirmed + email sent" });
+  } catch (error) {
+    console.error("Confirm Error:", error);
+    return res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
+// Update appointment
 router.put("/:id", async (req, res) => {
   try {
     const updated = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });

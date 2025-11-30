@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const sendConfirmationEmail = require("../utils/sendConfirmationEmail");
 
 // All possible slot times
 const ALL_SLOTS = [
@@ -51,6 +52,35 @@ router.post('/create', async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+router.put("/confirm/:id", async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        booking.status = "confirmed";
+        await booking.save();
+
+        // send email
+        await sendConfirmationEmail(
+            booking.email,
+            booking.name,
+            booking.date,
+            booking.time,
+            booking.service
+        );
+
+        res.json({ message: "Booking confirmed and email sent" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error confirming booking" });
+    }
+});
+
 
 
 module.exports = router;
