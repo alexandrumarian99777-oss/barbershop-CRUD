@@ -1,14 +1,14 @@
 const Appointment = require("../models/Appointment");
-const { 
-  sendConfirmationEmail, 
-  sendAdminNotification 
+const {
+  sendConfirmationEmail,
+  sendAdminNotification,
 } = require("../utils/sendEmail");
 
 exports.createAppointment = async (req, res) => {
   try {
     const { name, phone, date, time } = req.body;
 
-    // VALIDATION (unchanged)
+    // VALIDATIONS
     if (!name || !phone || !date || !time) {
       return res.status(400).json({ error: "All fields are required." });
     }
@@ -24,22 +24,27 @@ exports.createAppointment = async (req, res) => {
       return res.status(400).json({ error: "Cannot book in the past." });
     }
 
-    const existing = await Appointment.findOne({ date, time });
-    if (existing) {
+    const exists = await Appointment.findOne({ date, time });
+    if (exists) {
       return res.status(400).json({ error: "This time slot is already booked." });
     }
 
-    // SAVE APPOINTMENT
+    // SAVE APPOINTMENT FIRST
     const appointment = new Appointment({ name, phone, date, time });
     await appointment.save();
 
-    // SEND EMAILS
-    await sendConfirmationEmail(appointment);
-    await sendAdminNotification(appointment);
+    // TRY SENDING EMAILS (DO NOT CRASH IF FAILS)
+    try {
+      await sendConfirmationEmail(appointment);
+      await sendAdminNotification(appointment);
+    } catch (emailErr) {
+      console.error("Email error (ignored):", emailErr);
+    }
 
-    res.json({ 
-      message: "Appointment booked successfully! Confirmation email sent.",
-      appointment 
+    res.json({
+      success: true,
+      message: "Appointment booked successfully!",
+      appointment,
     });
 
   } catch (err) {
