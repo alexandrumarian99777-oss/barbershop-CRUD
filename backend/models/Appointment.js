@@ -6,8 +6,8 @@ const AppointmentSchema = new mongoose.Schema({
   email: { type: String, required: true },
   service: { type: String, required: true },
   date: { type: String, required: true },
-  time: { type: String, required: true },
-  status: { type: String, default: "pending" }
+  time: { type: String, required: true },   // CRITICAL
+  status: { type: String, default: "pending" },
 });
 
 module.exports = mongoose.model("Appointment", AppointmentSchema);
