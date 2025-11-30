@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
-const sendConfirmationEmail = require("../utils/sendConfirmationEmail");
+const sendConfirmationEmail = require("../utils/sendEmail");
 
 // All possible slot times
 const ALL_SLOTS = [
