@@ -5,11 +5,12 @@ const Appointment = require("../models/Appointment");
 // CREATE appointment
 router.post("/", async (req, res) => {
   try {
-    const { name, phone, date, time, service } = req.body;
+    const { name, phone, email, date, time, service } = req.body;
 
     const newAppt = new Appointment({
       name,
       phone,
+      email,
       date,
       time,
       service,

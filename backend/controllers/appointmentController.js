@@ -6,7 +6,7 @@ const {
 
 exports.createAppointment = async (req, res) => {
   try {
-    const { name, phone, date, time } = req.body;
+    const { name, phone, email, date, time } = req.body;
 
     // VALIDATIONS
     if (!name || !phone || !date || !time) {
