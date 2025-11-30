@@ -2,73 +2,93 @@ const express = require("express");
 const router = express.Router();
 const Appointment = require("../models/Appointment");
 
-// ===== CREATE APPOINTMENT (POST) =====
+// CREATE appointment
 router.post("/", async (req, res) => {
   try {
-    const { name, phone, date, time } = req.body;
+    const { name, phone, date, time, service } = req.body;
 
-    if (!name || !phone || !date || !time) {
-      return res.status(400).json({ message: "Missing fields" });
-    }
-
-    const newAppointment = new Appointment({
+    const newAppt = new Appointment({
       name,
       phone,
       date,
       time,
-      status: "confirmed"
+      service,
+      status: "pending",
     });
 
-    await newAppointment.save();
+    await newAppt.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Appointment booked successfully",
-      appointment: newAppointment
-    });
+    res.status(201).json({ success: true, appointment: newAppt });
   } catch (err) {
-    console.error("POST appointment error:", err);
+    console.error("Create Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// ===== GET ALL APPOINTMENTS (ADMIN) =====
+// GET all appointments
 router.get("/", async (req, res) => {
   try {
     const appointments = await Appointment.find().sort({ date: 1, time: 1 });
-
-    res.status(200).json({
-      success: true,
-      appointments
-    });
+    res.json({ success: true, appointments });
   } catch (err) {
-    console.error("GET appointments error:", err);
+    console.error("Fetch Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// ===== GET AVAILABLE SLOTS =====
-router.get("/available-slots", async (req, res) => {
+// UPDATE appointment
+router.put("/:id", async (req, res) => {
   try {
-    const { date } = req.query;
-
-    const allSlots = ["09:00", "10:00", "11:00", "12:00"];
-
-    const confirmed = await Appointment.find({
-      date,
-      status: "confirmed"
-    }).select("time");
-
-    const confirmedTimes = confirmed.map((t) => t.time);
-
-    const available = allSlots.filter(
-      (slot) => !confirmedTimes.includes(slot)
+    const updated = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
     );
 
-    res.json(available);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    res.json({ success: true, appointment: updated });
   } catch (err) {
-    console.error("Slot fetch error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Update Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// DELETE appointment
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Appointment.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    res.json({ success: true, message: "Deleted" });
+  } catch (err) {
+    console.error("Delete Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// CONFIRM appointment
+router.put("/confirm/:id", async (req, res) => {
+  try {
+    const confirmed = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status: "confirmed" },
+      { new: true }
+    );
+
+    if (!confirmed) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    res.json({ success: true, appointment: confirmed });
+  } catch (err) {
+    console.error("Confirm Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
