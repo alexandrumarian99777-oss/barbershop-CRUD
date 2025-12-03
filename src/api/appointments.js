@@ -1,5 +1,5 @@
-export const API_BASE =
-  process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+export const API_BASE = "https://your-backend.onrender.com";
+
 
 // Fix base URL to reach /admin (because admin is NOT under /api)
 const ADMIN_BASE = API_BASE.replace("/api", "");

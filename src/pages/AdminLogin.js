@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api";
+// Automatically switch between local dev and production
+const API_BASE =
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export default function AdminLogin() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -16,7 +18,7 @@ export default function AdminLogin() {
 
       if (res.data.success) {
         localStorage.setItem("adminToken", res.data.token);
-        window.location.href = "/admin"; // redirect
+        window.location.href = "/admin";
       } else {
         setError("Login failed");
       }
@@ -46,10 +48,7 @@ export default function AdminLogin() {
           style={{ width: "100%", padding: 10, marginBottom: 10 }}
         />
 
-        <button
-          type="submit"
-          style={{ width: "100%", padding: 10 }}
-        >
+        <button type="submit" style={{ width: "100%", padding: 10 }}>
           Login
         </button>
 
