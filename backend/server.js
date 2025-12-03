@@ -4,27 +4,23 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
 dotenv.config();
-
 const app = express();
 
-// DATABASE CONNECTION
+// CONNECT DATABASE
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB Error:", err));
 
 // MIDDLEWARE
 app.use(cors());
 app.use(express.json());
 
-// API ROUTES
+// ROUTES
 app.use("/api/appointments", require("./routes/appointments"));
-app.use("/api/admin-login", require("./routes/adminAuth"));
+app.use("/api/admin", require("./routes/adminAuth")); // IMPORTANT
 
-// IMPORTANT: REMOVE client/build — your frontend is on Render Static Site
-// DO NOT SERVE REACT FROM BACKEND
-
-// ROOT CHECK
+// ROOT TEST
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running" });
 });
