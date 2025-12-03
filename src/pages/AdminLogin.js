@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-// Automatically switch between local dev and production
-const API_BASE =
-  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_BASE = "https://barbershop-crud-2.onrender.com/api";
 
 export default function AdminLogin() {
   const [form, setForm] = useState({ username: "", password: "" });
