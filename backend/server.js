@@ -2,10 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const adminRoutes = require("./routes/adminRoutes");
-const adminAuthRoutes = require("./routes/adminAuth");
 
-dotenv.config(); // LOAD ENV
+dotenv.config();
 
 const app = express();
 
@@ -25,12 +23,12 @@ app.use(express.json());
 // USER ROUTES
 app.use("/api/appointments", require("./routes/appointments"));
 
-// ADMIN AUTH ROUTE (login only)
-app.use("/api/admin", adminAuthRoutes);
+// ADMIN LOGIN ONLY
+app.use("/api/admin-login", require("./routes/adminAuth"));
 
-// PROTECTED ADMIN ROUTES (AFTER LOGIN)
-app.use("/api/admin/dashboard", adminRoutes);
+// NO auto-login
+// NO /api/admin
+// NO /api/admin/dashboard
 
-// SERVER
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

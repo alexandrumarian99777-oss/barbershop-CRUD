@@ -6,9 +6,15 @@ const sendConfirmationEmail = require("../utils/sendEmail");
 
 // All possible slot times
 const ALL_SLOTS = [
-  "09:00", "10:00", "11:00",
-  "12:00", "13:00", "14:00",
-  "15:00", "16:00", "17:00"
+  "09:00", "09:30",
+  "10:00", "10:30",
+  "11:00", "11:30",
+  "12:00", "12:30",
+  "13:00", "13:30",
+  "14:00", "14:30",
+  "15:00", "15:30",
+  "16:00", "16:30",
+  "17:00", "17:30"
 ];
 
 // GET available slots for a date
@@ -79,7 +85,34 @@ router.put("/confirm/:id", async (req, res) => {
         console.error(err);
         res.status(500).json({ message: "Error confirming booking" });
     }
+});router.put("/confirm/:id", async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        booking.status = "confirmed";
+        await booking.save();
+
+        // send email (FIXED FIELD NAMES)
+        await sendConfirmationEmail(
+            booking.email,
+            booking.name,
+            booking.date,
+            booking.slot,    // <----- FIXED HERE
+            booking.service
+        );
+
+        res.json({ message: "Booking confirmed and email sent" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error confirming booking" });
+    }
 });
+
 
 
 
