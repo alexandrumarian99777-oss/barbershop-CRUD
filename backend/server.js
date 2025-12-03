@@ -7,12 +7,9 @@ dotenv.config();
 
 const app = express();
 
-// CONNECT DATABASE
+// DATABASE CONNECTION
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB Error:", err));
 
@@ -20,15 +17,18 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-// USER ROUTES
+// API ROUTES
 app.use("/api/appointments", require("./routes/appointments"));
-
-// ADMIN LOGIN ONLY
 app.use("/api/admin-login", require("./routes/adminAuth"));
 
-// NO auto-login
-// NO /api/admin
-// NO /api/admin/dashboard
+// IMPORTANT: REMOVE client/build — your frontend is on Render Static Site
+// DO NOT SERVE REACT FROM BACKEND
 
+// ROOT CHECK
+app.get("/", (req, res) => {
+  res.json({ message: "Backend is running" });
+});
+
+// START SERVER
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
