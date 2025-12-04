@@ -1,4 +1,4 @@
-export const API_BASE = "https://your-backend.onrender.com";
+export const API_BASE = "https://barbershop-crud.onrender.com/";
 
 
 // Fix base URL to reach /admin (because admin is NOT under /api)
