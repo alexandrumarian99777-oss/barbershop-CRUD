@@ -2,11 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const path = require("path");
 
 dotenv.config();
 const app = express();
 
-// CONNECT DATABASE
+// DATABASE
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected"))
@@ -16,13 +17,20 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-// ROUTES
+// API ROUTES
 app.use("/api/appointments", require("./routes/appointments"));
-app.use("/api/admin", require("./routes/adminAuth")); // IMPORTANT
+app.use("/api/admin", require("./routes/adminAuth"));
 
-// ROOT TEST
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running" });
+// HEALTH CHECK FOR RENDER
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
+});
+
+// SERVE REACT FRONTEND
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
 // START SERVER
